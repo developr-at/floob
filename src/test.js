@@ -1,3 +1,3 @@
 export default {
-    foo: "bar123"
+    foo: 'bar123'
 };
