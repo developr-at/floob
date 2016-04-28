@@ -1,3 +1,5 @@
-import test from './test'
+import PageFetcher from './page/fetcher'
 
-console.log(test.foo);
+PageFetcher.fetch('http://www.test.at', (pageResult) => {
+    console.log(pageResult);
+});
