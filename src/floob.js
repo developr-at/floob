@@ -1,5 +1,9 @@
-import PageFetcher from './page/fetcher'
+import PageFetcher from './page/fetcher';
+import Option from './option/option';
 
-PageFetcher.fetch('http://www.test.at', (pageResult) => {
-    console.log(pageResult);
-});
+var options = Option.parse(process.argv);
+if (options.url) {
+    PageFetcher.fetch(options.url, (pageResult) => {
+        console.log(pageResult);
+    });
+}
