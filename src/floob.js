@@ -1,3 +1,4 @@
+// import FloobApp from 'floob-app';
 import PageFetcher from './page/fetcher';
 import Option from './option/option';
 
@@ -7,3 +8,5 @@ if (options.url) {
         console.log(pageResult);
     });
 }
+
+// FloobApp.process(options);

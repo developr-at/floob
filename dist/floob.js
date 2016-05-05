@@ -56,12 +56,17 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	// import FloobApp from 'floob-app';
+
+
 	var options = _option2.default.parse(process.argv);
 	if (options.url) {
 	    _fetcher2.default.fetch(options.url, function (pageResult) {
 	        console.log(pageResult);
 	    });
 	}
+
+	// FloobApp.process(options);
 
 /***/ },
 /* 1 */
