@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "mocha --compilers js:babel-core/register --recursive",
-    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- --compilers js:babel-register --recursive"
+    "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- --compilers js:babel-core/register --recursive"
   },
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
     "json-loader": "^0.5.4",
     "mocha": "^2.4.5",
     "node-getopt": "^0.2.3",
-    "request": "^2.65.0",
+    "request": "2.65.0",
     "sinon": "^1.17.3",
     "webpack": "^1.13.0"
   },
