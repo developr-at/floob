@@ -14,6 +14,6 @@ export default {
     fetch: (url, callback) => {
         request.get(url, function (err, resp, body) {
             callback(mapFetchResult(err, resp, body, url));
-        })
+        });
     }
 };

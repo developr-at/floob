@@ -1,4 +1,4 @@
-// import PageQueue from ...
+import PageQueue from './page/queue';
 // import PluginManager from ...
 
 function outputHandler(msg) {
@@ -12,6 +12,9 @@ export default {
 
         const { url } = options;
 
-        // PageQueue.enqueue(url, PluginManager.process, outputHandler);
+        PageQueue.enqueue(url, (output) => {
+            console.log("Finished---");
+            console.log(output);
+        });
     }
 };
