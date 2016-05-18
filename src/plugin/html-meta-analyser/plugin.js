@@ -9,7 +9,7 @@ const facebookMediaTags = [ 'og:url', 'og:type', 'og:title', 'og:image', 'og:des
 // https://dev.twitter.com/cards/markup
 const twitterMediaTags = [ 'twitter:card', 'twitter:title', 'twitter:description', 'twitter:creator' ];
 
-function processExistingMetaTags($, $metaTags, output) {
+function processExistingMetaTags($, $metaTags, logger) {
     const existingTags = $metaTags.map((idx, tag) => {
         return {
             name: $(tag).attr('name'),
@@ -21,14 +21,14 @@ function processExistingMetaTags($, $metaTags, output) {
     const tagCount = existingTags.length;
     const tagNames = existingTags.map((t) => t.name).join(', ');
 
-    output('Found {0} tags: {1}'.format(tagCount, tagNames));
+    logger.log('Found {0} tags: {1}'.format(tagCount, tagNames));
 }
 
 export default {
-    process: (data, output) => {
-        const $ = data;
+    process: (data, logger) => {
+        const $ = data.data;
         const $metaTags = $('meta');
 
-        processExistingMetaTags($, $metaTags, output);
+        processExistingMetaTags($, $metaTags, logger);
     }
 };

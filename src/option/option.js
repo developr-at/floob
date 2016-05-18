@@ -2,7 +2,7 @@ import Getopt from 'node-getopt';
 
 function createOptionSchema() {
     return new Getopt([
-        ['h' , 'help', 'Output usage information'],
+        ['h', 'help', 'Output usage information'],
         ['u', 'url=ARG', 'URL to scan']
     ]);
 }

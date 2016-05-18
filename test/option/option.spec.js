@@ -4,7 +4,7 @@ import Option from '../../src/option/option'
 
 describe('Option Component', () => {
 
-    it('should recognize --url or -u option.', (done) => {
+    it('should recognize --url or -u option.', () => {
         var url = 'http://www.google.at';
         var args = ['--url', url];
         var options = Option.parse(args);
@@ -13,8 +13,6 @@ describe('Option Component', () => {
         args = ['-u', url];
         options = Option.parse(args);
         expect(options.url).to.equal(url);
-
-        done();
     });
 
 });
