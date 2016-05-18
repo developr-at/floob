@@ -12,9 +12,11 @@ export default {
 
         const { url } = options;
 
-        PageQueue.enqueue(url, (output) => {
+        PageQueue.setup({ url, processResult: (output) => {
             console.log("Finished---");
             console.log(output);
-        });
+        }});
+
+        PageQueue.start();
     }
 };
