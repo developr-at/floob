@@ -11,30 +11,6 @@ let processResultFn;
 // Domain from which we want to process the URLs
 let domainToProcess;
 
-function enqueueUrl(url) {
-    console.log(`Enqueue ${url}`);
-
-    // // Ignore javascript links
-    // if (url.startsWith('javascript:')) {
-    //     return false;
-    // }
-
-    // // TODO: Resolve relative links
-    // const domain = extractDomain(url);
-
-    // // Check domain
-    // if (!!domainToProcess && domainToProcess !== domain) {
-    //     return false;
-    // }
-
-    // // Check already processed
-    // if (!!processedUrls && processedUrls.includes(url)) {
-    //     return false;
-    // }
-
-    urlsToProcess.push(url);
-}
-
 function processNext() {
     const url = urlsToProcess.shift();
 
@@ -48,7 +24,7 @@ function processNext() {
         if (status != -1) {
             PageLinkExtractor.extractLinks(raw)
                 .map((s) => s.trim())
-                .forEach(enqueueUrl);
+                .forEach(PageQueue.enqueue);
         }
 
         if (urlsToProcess.length > 0) {
@@ -57,12 +33,42 @@ function processNext() {
     });
 }
 
-export default {
-    enqueue: (url, processResult) => {
+const PageQueue = {
+    setup: (options) => {
+        const { url, processResult } = options;
+
         domainToProcess = extractDomain(url);
         processResultFn = processResult;
 
-        enqueueUrl(url);
+        PageQueue.enqueue(url);
+    },
+
+    enqueue: (url, processResult) => {
+        // Ignore javascript links
+        if (url.startsWith('javascript:')) {
+            return false;
+        }
+
+        // // TODO: Resolve relative links
+        // const domain = extractDomain(url);
+
+        // // Check domain
+        // if (!!domainToProcess && domainToProcess !== domain) {
+        //     return false;
+        // }
+
+        // // Check already processed
+        // if (!!processedUrls && processedUrls.includes(url)) {
+        //     return false;
+        // }
+
+        console.log(`Enqueue ${url}`);
+        urlsToProcess.push(url);
+    },
+
+    start: () => {
         processNext();
     }
-}
+};
+
+export default PageQueue;
