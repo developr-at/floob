@@ -34,6 +34,14 @@ function processNext() {
 }
 
 const PageQueue = {
+    get urlsToProcess () {
+        return urlsToProcess.slice();
+    },
+
+    clear: () => {
+        urlsToProcess.splice(0, urlsToProcess.length);
+    },
+
     setup: (options) => {
         const { url, processResult } = options;
 
@@ -67,6 +75,10 @@ const PageQueue = {
     },
 
     start: () => {
+        if (!domainToProcess || !processResultFn) {
+            throw Error('PageQueue hasn\'t been setup correctly. Please provide "domainToProcess" and "processResultFn"');
+        }
+
         processNext();
     }
 };
