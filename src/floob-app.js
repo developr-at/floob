@@ -1,22 +1,26 @@
 import PageQueue from './page/queue';
-// import PluginManager from ...
+import PluginManager from './base/PluginManager';
+import ConsoleLogger from './logger/ConsoleLogger';
 
-function outputHandler(msg) {
-    // do something with message
-    // console.log(msg);
-}
+var FloobApp = {
+    logger: ConsoleLogger,
 
-export default {
-    process: (options) => {
+    process: function(options) {
         // Validate options
-
         const { url } = options;
+        const self = this;
 
-        PageQueue.setup({ url, processResult: (output) => {
-            console.log("Finished---");
-            console.log(output);
-        }});
+        PluginManager.setup(options, () => {
+            self.logger.log("Initialized PluginManager");
 
-        PageQueue.start();
+            PageQueue.setup({ url, processResult: (data) => {
+                self.logger.log(`Fetched data from url ${url}`);
+                PluginManager.process(data, self.logger);
+            }});
+
+            PageQueue.start();
+        });
     }
 };
+
+export default FloobApp;
