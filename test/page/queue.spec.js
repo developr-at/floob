@@ -3,47 +3,70 @@ import { expect } from 'chai';
 import PageQueue from '../../src/page/queue.js';
 
 describe('PageQueue Component', () => {
-    it('should be able to add new urls to the queue', () => {
-        expect(PageQueue.urlsToProcess).to.exist;
-        expect(PageQueue.urlsToProcess).to.be.empty;
+    it('should be able to initially setup queue', () => {
+        const queue = PageQueue.create({ url: "http://www.test.at", processResult: () => {}});
 
-        PageQueue.enqueue("http://www.test.at");
-
-        expect(PageQueue.urlsToProcess).to.have.lengthOf(1);
+        expect(queue.urlsToProcess).to.exist;
+        expect(queue.urlsToProcess).to.have.lengthOf(1);
     });
 
     it('should be able to clear the queue', () => {
-        // hmm issue with preceeding test... maybe change the way we use the queue.
-        PageQueue.clear();
+        const queue = PageQueue.create({ url: "http://www.test1.at", processResult: () => {}});
+        queue.enqueue("http://www.test1.at/123");
+        queue.enqueue("http://www.test1.at/123/456");
 
-        expect(PageQueue.urlsToProcess).to.be.empty;
-
-        PageQueue.enqueue("http://www.test1.at");
-        PageQueue.enqueue("http://www.test2.at");
-        PageQueue.enqueue("http://www.test3.at");
-
-        expect(PageQueue.urlsToProcess).to.have.lengthOf(3);
-
-        PageQueue.clear();
-
-        expect(PageQueue.urlsToProcess).to.be.empty;
+        expect(queue.urlsToProcess).to.have.lengthOf(3);
+        queue.clear();
+        expect(queue.urlsToProcess).to.be.empty;
     });
 
-    it('should not add duplicate urls');
-    it('should resolve relative urls');
-    it('should only accept urls from the same domain');
+    it('should not add duplicate urls', () => {
+        const queue = PageQueue.create({ url: "http://www.test1.at", processResult: () => {}});
+        expect(queue.enqueue("http://www.test1.at/123")).to.be.true;
+        expect(queue.enqueue("http://www.test1.at/123")).to.be.false;
+        expect(queue.enqueue("http://www.test1.at/123")).to.be.false;
+        expect(queue.enqueue("http://www.test1.at/123/456")).to.be.true;
+        expect(queue.enqueue("http://www.test1.at/123/456")).to.be.false;
+        expect(queue.enqueue("http://www.test1.at/123/456")).to.be.false;
+
+        expect(queue.urlsToProcess).to.have.lengthOf(3);
+    });
+
+
+    it('should resolve relative urls', () => {
+        const queue = PageQueue.create({ url: "http://www.test.at", processResult: () => {}});
+        expect(queue.enqueue("/page/1")).to.be.true;
+        expect(queue.enqueue("/page/2/3")).to.be.true;
+
+        expect(queue.urlsToProcess).to.have.lengthOf(3);
+        expect(queue.urlsToProcess[1]).to.equal("http://www.test.at/page/1");
+        expect(queue.urlsToProcess[2]).to.equal("http://www.test.at/page/2/3");
+    });
+
+
+    it('should only accept urls from the same domain', () => {
+        const queue = PageQueue.create({ url: "http://www.test1.at", processResult: () => {}});
+        expect(queue.enqueue("http://www.22222.at/123")).to.be.false;
+        expect(queue.enqueue("http://www.33333.at/123/456")).to.be.false;
+        expect(queue.enqueue("http://www.test1.at/123/456")).to.be.true;
+
+        expect(queue.urlsToProcess).to.have.lengthOf(2);
+    });
 
     it('should not add javascript urls', () => {
-        PageQueue.clear();
+        const queue = PageQueue.create({ url: "http://www.test1.at", processResult: () => {}});
 
-        expect(PageQueue.urlsToProcess).to.be.empty;
+        expect(queue.urlsToProcess).to.have.lengthOf(1);
 
-        PageQueue.enqueue('javascript:alert("test")');
+        queue.enqueue('javascript:alert("test1")');
+        queue.enqueue('javascript:alert("test2")');
+        queue.enqueue('javascript:alert("test3")');
+        queue.enqueue('javascript:alert("test4")');
 
-        expect(PageQueue.urlsToProcess).to.be.empty;
+        expect(queue.urlsToProcess).to.have.lengthOf(1);
     });
 
-    it('should fail on start, if the Queue hasn\'t been setup', () => {
-        expect(PageQueue.start).to.throw(Error, /PageQueue hasn't been setup correctly/);
+    it('should fail if no options are provided', () => {
+        expect(PageQueue.create).to.throw(Error, /Please provide at least 'url' and 'processResult' as options./);
     });
 });

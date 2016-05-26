@@ -1,85 +1,111 @@
 import PageFetcher from './fetcher';
 import PageLinkExtractor from './link-extractor';
-import { extractDomain } from '../util/url-helper';
+import { extractDomain, haveSameDomain, isAbsoluteUrl } from '../util/url-helper';
 
-// List of URLs we still need to process
-const urlsToProcess = [];
-// List of URLs we have already processed
-const processedUrls = [];
-// Callback to externally process page result
-let processResultFn;
-// Domain from which we want to process the URLs
-let domainToProcess;
 
-function processNext() {
-    const url = urlsToProcess.shift();
-
-    PageFetcher.fetch(url, (pageResult) => {
-        processResultFn(pageResult);
-
-        const { status, url, raw } = pageResult;
-
-        processedUrls.push(url);
-
-        if (status != -1) {
-            PageLinkExtractor.extractLinks(raw)
-                .map((s) => s.trim())
-                .forEach(PageQueue.enqueue);
-        }
-
-        if (urlsToProcess.length > 0) {
-            processNext();
-        }
-    });
-}
 
 const PageQueue = {
-    get urlsToProcess () {
-        return urlsToProcess.slice();
-    },
+    create: (options) => {
+        // List of URLs we still need to process
+        const urlsToProcess = [];
+        // List of URLs we have already processed
+        const processedUrls = [];
+        // Callback to externally process page result
+        let processResultFn;
+        // Domain from which we want to process the URLs
+        let domainToProcess;
 
-    clear: () => {
-        urlsToProcess.splice(0, urlsToProcess.length);
-    },
+        const queue = {
+            get urlsToProcess () {
+                return urlsToProcess.slice();
+            },
 
-    setup: (options) => {
-        const { url, processResult } = options;
+            clear: () => {
+                urlsToProcess.splice(0, urlsToProcess.length);
+            },
 
-        domainToProcess = extractDomain(url);
-        processResultFn = processResult;
+            convertRelativeToAbsoluteUrl: (relativeUrl) => {
+                if (!domainToProcess) {
+                    return relativeUrl;
+                }
 
-        PageQueue.enqueue(url);
-    },
+                // TODO: Fix hardcoded http://
+                return `http://${domainToProcess}${relativeUrl}`;
+            },
 
-    enqueue: (url, processResult) => {
-        // Ignore javascript links
-        if (url.startsWith('javascript:')) {
-            return false;
+            enqueue: (url, processResult) => {
+                // Ignore javascript links
+                if (url.startsWith('javascript:')) {
+                    return false;
+                }
+
+                const absoluteUrl = isAbsoluteUrl(url) ? url : queue.convertRelativeToAbsoluteUrl(url);
+
+                if (!haveSameDomain(domainToProcess, absoluteUrl)) {
+                    return false;
+                }
+
+                // Check already processed
+                if (!!processedUrls && processedUrls.indexOf(absoluteUrl) !== -1) {
+                    return false;
+                }
+
+                // Check already in queue
+                if (!!urlsToProcess && urlsToProcess.indexOf(absoluteUrl) !== -1) {
+                    return false;
+                }
+
+                urlsToProcess.push(absoluteUrl);
+                return true;
+            },
+
+            start: () => {
+                if (!domainToProcess || !processResultFn) {
+                    throw Error('PageQueue hasn\'t been setup correctly. Please provide "domainToProcess" and "processResultFn"');
+                }
+
+                processNext();
+            }
+        };
+
+        setup(options);
+
+        return queue;
+
+        function setup(setupOptions) {
+            if (!setupOptions) {
+                throw Error(`Please provide at least 'url' and 'processResult' as options.`);
+            }
+
+            const { url, processResult } = setupOptions;
+
+            domainToProcess = extractDomain(url);
+            processResultFn = processResult;
+
+            queue.enqueue(url);
         }
 
-        // // TODO: Resolve relative links
-        // const domain = extractDomain(url);
+        function processNext() {
+            const url = urlsToProcess.shift();
 
-        // // Check domain
-        // if (!!domainToProcess && domainToProcess !== domain) {
-        //     return false;
-        // }
+            PageFetcher.fetch(url, (pageResult) => {
+                processResultFn(pageResult);
 
-        // // Check already processed
-        // if (!!processedUrls && processedUrls.includes(url)) {
-        //     return false;
-        // }
+                const { status, url, raw } = pageResult;
 
-        console.log(`Enqueue ${url}`);
-        urlsToProcess.push(url);
-    },
+                processedUrls.push(url);
 
-    start: () => {
-        if (!domainToProcess || !processResultFn) {
-            throw Error('PageQueue hasn\'t been setup correctly. Please provide "domainToProcess" and "processResultFn"');
+                if (status != -1) {
+                    PageLinkExtractor.extractLinks(raw)
+                        .map((s) => s.trim())
+                        .forEach(queue.enqueue);
+                }
+
+                if (urlsToProcess.length > 0) {
+                    processNext();
+                }
+            });
         }
-
-        processNext();
     }
 };
 
