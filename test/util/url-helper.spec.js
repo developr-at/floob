@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { extractDomain, haveSameDomain } from '../../src/util/url-helper';
+import { extractDomain, haveSameDomain, isAbsoluteUrl } from '../../src/util/url-helper';
 
 describe('URL Helper', () => {
     it('should be able to handle an empty string', () => {
@@ -16,4 +16,15 @@ describe('URL Helper', () => {
         expect(haveSameDomain('https://www.google.com/webhp?q=test', 'http://www.google.com')).to.be.true;
         expect(haveSameDomain('www.test.at', 'test.at')).to.be.false;
     });
+
+    it('should recognize relative urls', () => {
+        expect(isAbsoluteUrl('/post/1234')).to.be.false;
+        expect(isAbsoluteUrl('test/page/123')).to.be.false;
+    })
+
+    it('should recognize absolute urls', () => {
+        expect(isAbsoluteUrl('http://www.google.com')).to.be.true;
+        expect(isAbsoluteUrl('https://www.google.com')).to.be.true;
+        expect(isAbsoluteUrl('ftp://whatever.com')).to.be.true;
+    })
 });

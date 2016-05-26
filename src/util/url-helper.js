@@ -16,3 +16,9 @@ export function extractDomain(url) {
 export function haveSameDomain(baseUrl, urlToCompare) {
     return extractDomain(baseUrl) === extractDomain(urlToCompare);
 }
+
+// http://stackoverflow.com/a/10687137/733368
+export function isAbsoluteUrl(url) {
+    const absoluteRegEx = /^(?:[a-z]+:)?\/\//i;
+    return absoluteRegEx.test(url);
+}
