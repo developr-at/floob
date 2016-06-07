@@ -2,9 +2,15 @@ import PageFetcher from './fetcher';
 import PageLinkExtractor from './link-extractor';
 import { extractDomain, haveSameDomain, isAbsoluteUrl } from '../util/url-helper';
 
-
-
+/**
+ * PageQueue is responsible for processing a list of pages.
+ */
 const PageQueue = {
+    /**
+     * Creates a new PageQueue with the given options.
+     * @param {object} options Options to initialize the queue with.
+     * @return New PageQueue object.
+     */
     create: (options) => {
         // List of URLs we still need to process
         const urlsToProcess = [];
@@ -16,24 +22,43 @@ const PageQueue = {
         let domainToProcess;
 
         const queue = {
+            /**
+             * Returns a clone of the current list of urls which are scheduled
+             * for processing.
+             * @return List of urls to be processed.
+             */
             get urlsToProcess () {
                 return urlsToProcess.slice();
             },
 
+            /**
+             * Clears the current list of urls to process.
+             */
             clear: () => {
                 urlsToProcess.splice(0, urlsToProcess.length);
             },
 
+            /**
+             * Converts a given relative url to an absolute url.
+             * @param {string} relativeUrl Relative URL.
+             * @return Absolute URL.
+             */
             convertRelativeToAbsoluteUrl: (relativeUrl) => {
                 if (!domainToProcess) {
                     return relativeUrl;
                 }
 
                 // TODO: Fix hardcoded http://
+                // TODO: Use https://www.npmjs.com/package/url
                 return `http://${domainToProcess}${relativeUrl}`;
             },
 
-            enqueue: (url, processResult) => {
+            /**
+             * Enqueues the given url if it satisfies various conditions.
+             * @param {string} url URL to add.
+             * @return True if the url could be added; False otherwise.
+             */
+            enqueue: (url) => {
                 // Ignore javascript links
                 if (url.startsWith('javascript:')) {
                     return false;
@@ -59,6 +84,9 @@ const PageQueue = {
                 return true;
             },
 
+            /**
+             * Starts the processing of the enqueued urls.
+             */
             start: () => {
                 if (!domainToProcess || !processResultFn) {
                     throw Error('PageQueue hasn\'t been setup correctly. Please provide "domainToProcess" and "processResultFn"');
@@ -72,6 +100,10 @@ const PageQueue = {
 
         return queue;
 
+        /**
+         * Setup the PageQueue with the given options.
+         * @param {object} setupOptions Options for the queue processing.
+         */
         function setup(setupOptions) {
             if (!setupOptions) {
                 throw Error(`Please provide at least 'url' and 'processResult' as options.`);
@@ -85,6 +117,9 @@ const PageQueue = {
             queue.enqueue(url);
         }
 
+        /**
+         * Tries to fetch the next url.
+         */
         function processNext() {
             const url = urlsToProcess.shift();
 
