@@ -1,5 +1,6 @@
 import PageFetcher from './fetcher';
 import PageLinkExtractor from './link-extractor';
+import AppLogger from '../logger/app-logger';
 import { extractDomain, haveSameDomain, isAbsoluteUrl } from '../util/url-helper';
 
 /**
@@ -61,25 +62,30 @@ const PageQueue = {
             enqueue: (url) => {
                 // Ignore javascript links
                 if (url.startsWith('javascript:')) {
+                    AppLogger.verbose('PageQueue', `Ignore javascript url: ${url}`);
                     return false;
                 }
 
                 const absoluteUrl = isAbsoluteUrl(url) ? url : queue.convertRelativeToAbsoluteUrl(url);
 
                 if (!haveSameDomain(domainToProcess, absoluteUrl)) {
+                    AppLogger.verbose('PageQueue', `Ignore url from different domain: ${url}`);
                     return false;
                 }
 
                 // Check already processed
                 if (!!processedUrls && processedUrls.indexOf(absoluteUrl) !== -1) {
+                    AppLogger.verbose('PageQueue', `Ignore already processed url: ${url}`);
                     return false;
                 }
 
                 // Check already in queue
                 if (!!urlsToProcess && urlsToProcess.indexOf(absoluteUrl) !== -1) {
+                    AppLogger.verbose('PageQueue', `Ignore already enqueued url: ${url}`);
                     return false;
                 }
 
+                AppLogger.verbose('PageQueue', `Enqueuing url ${absoluteUrl}`);
                 urlsToProcess.push(absoluteUrl);
                 return true;
             },
@@ -89,6 +95,7 @@ const PageQueue = {
              */
             start: () => {
                 if (!domainToProcess || !processResultFn) {
+                    AppLogger.error('PageQueue', 'PageQueue hasn\'t been setup correctly. Please provide "domainToProcess" and "processResultFn"');
                     throw Error('PageQueue hasn\'t been setup correctly. Please provide "domainToProcess" and "processResultFn"');
                 }
 
@@ -106,6 +113,7 @@ const PageQueue = {
          */
         function setup(setupOptions) {
             if (!setupOptions) {
+                AppLogger.error('PageQueue', `Please provide at least 'url' and 'processResult' as options.`);
                 throw Error(`Please provide at least 'url' and 'processResult' as options.`);
             }
 
@@ -131,13 +139,18 @@ const PageQueue = {
                 processedUrls.push(url);
 
                 if (status != -1) {
-                    PageLinkExtractor.extractLinks(raw)
-                        .map((s) => s.trim())
-                        .forEach(queue.enqueue);
+                    const links = PageLinkExtractor.extractLinks(raw)
+                        .map((s) => s.trim());
+
+                    AppLogger.verbose('PageQueue', `Found ${links.length} links on ${url}`);
+
+                    links.forEach(queue.enqueue);
                 }
 
                 if (urlsToProcess.length > 0) {
                     processNext();
+                } else {
+                    AppLogger.info('PageQueue', 'No more urls to process found!');
                 }
             });
         }

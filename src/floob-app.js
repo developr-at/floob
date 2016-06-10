@@ -1,6 +1,7 @@
 import PageQueue from './page/queue';
 import PluginManager from './base/PluginManager';
 import ConsoleLogger from './logger/ConsoleLogger';
+import AppLogger from './logger/app-logger';
 
 /**
  * Floob Application contains the base functionality of the app.
@@ -18,11 +19,13 @@ var FloobApp = {
         const { url } = options;
         const self = this;
 
+        AppLogger.info('FloobApp', 'Start processing with options:', options);
+
         PluginManager.setup(options, () => {
-            self.logger.log("Initialized PluginManager");
+            AppLogger.info('PluginManager', 'Initialized PluginManager');
 
             const queue = PageQueue.create({ url, processResult: (data) => {
-                self.logger.log(`Fetched data from url ${url}`);
+                AppLogger.info('PageQueue', `Fetched data from url ${url}`);
                 PluginManager.process(data, self.logger);
             }});
 
