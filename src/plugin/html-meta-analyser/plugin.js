@@ -1,34 +1,154 @@
 import cheerio from 'cheerio';
-import { format } from '../../util/string-extensions';
 
 // https://www.w3.org/TR/html5/document-metadata.html#the-meta-element
 // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta
 const recommendedTags = [ 'author', 'description', 'viewport' ];
 // https://developers.facebook.com/docs/sharing/webmasters#markup
-const facebookMediaTags = [ 'og:url', 'og:type', 'og:title', 'og:image', 'og:description', 'og:site_name', 'fb:app_id' ];
+const facebookMediaTags = [ 'og:url', 'og:type', 'og:title', 'og:image', 'og:description', 'og:site_name', 'og:locale', 'fb:app_id' ];
 // https://dev.twitter.com/cards/markup
 const twitterMediaTags = [ 'twitter:card', 'twitter:title', 'twitter:description', 'twitter:creator' ];
 
-function processExistingMetaTags($, $metaTags, logger) {
-    const existingTags = $metaTags.map((idx, tag) => {
+/**
+ * Checks if a single tag is considered a facebook tag.
+ * @param {object} tag The tag to check.
+ * @return True if it is a facebook tag; False otherwise;
+ */
+function isFacebookTag(tag) {
+    return tag.property && facebookMediaTags.indexOf(tag.property) !== -1;
+}
+
+/**
+ * Checks if a single tag is considered a twitter tag.
+ * @param {object} tag The tag to check.
+ * @return True if it is a twitter tag; False otherwise;
+ */
+function isTwitterTag(tag) {
+    return tag.name && twitterMediaTags.indexOf(tag.name) !== -1;
+}
+
+/**
+ * Returns a list of existing meta tags from the given html source.
+ * @param {string} html HTML source.
+ * @returns List of meta tags.
+ */
+function getExistingTags($) {
+    const tags = $('meta').map((idx, tag) => {
+        const $tag = $(tag);
+
         return {
-            name: $(tag).attr('name'),
-            property: $(tag).attr('property'),
-            value: $(tag).attr('value'),
+            name: $tag.attr('name'),
+            charset: $tag.attr('charset'),
+            http: $tag.attr('http-equiv'),
+            itemprop: $tag.attr('itemprop'),
+            property: $tag.attr('property'),
+            value: $tag.attr('value'),
+            content: $tag.attr('content'),
+
+            getName() {
+                return this.name || this.charset || this.http || this.itemprop || this.property;
+            },
+
+            getValue() {
+                return this.value || this.content;
+            }
         };
     }).toArray();
 
-    const tagCount = existingTags.length;
-    const tagNames = existingTags.map((t) => t.name).join(', ');
-
-    logger.log('Found {0} tags: {1}'.format(tagCount, tagNames));
+    return tags;
 }
 
-export default {
-    process: (data, logger) => {
-        const $ = data.data;
-        const $metaTags = $('meta');
+/**
+ * Processes the given list of meta tags and prints out information about them.
+ * @param {array} tags List of meta tags.
+ * @param {object} logger Logger to use to output information about the tags.
+ */
+function processExistingTags(tags, logger) {
+    const tagCount = tags.length;
 
-        processExistingMetaTags($, $metaTags, logger);
+    if (tagCount === 0) {
+        logger.log('No meta tags found!');
+        return;
+    }
+
+    logger.log(`Found ${tagCount} meta tags`);
+    logger.log('---------------------------');
+
+    tags.forEach((tag) => {
+        logger.log(` - [${tag.getName()}]: "${tag.getValue()}"`);
+    });
+
+    logger.log('---------------------------');
+}
+
+/**
+ * Processes the given list of meta tags and prints out information about them.
+ * @param {array} tags List of meta tags.
+ * @param {object} logger Logger to use to output information about the tags.
+ * @param {string} tagName Name of the given tags.
+ * @param {array} recommendedTagNames List of recommended tag names.
+ */
+function processTags(tags, logger, tagName, recommendedTagNames) {
+    // Existing tags
+    if (tags.length === 0) {
+        logger.log(`No ${tagName} found!`);
+        logger.log('---------------------------');
+    } else {
+        logger.log(`Found ${tags.length} ${tagName}`);
+        logger.log('---------------------------');
+        tags.forEach((tag) => {
+            logger.log(` - [${tag.getName()}]: "${tag.getValue()}"`);
+        });
+        logger.log('---------------------------');
+    }
+
+    // Recommended tags
+    const tagNames = tags.map((t) => t.getName());
+    const recommendedTags = recommendedTagNames.filter((t) => tagNames.indexOf(t) === -1);
+
+    logger.log(`Recommended ${recommendedTags.length} more ${tagName}`);
+    logger.log('---------------------------');
+
+    recommendedTags.forEach((tag) => {
+        logger.log(` - [${tag}]`);
+    });
+
+    logger.log('---------------------------');
+}
+
+/**
+ * Processes the given list of meta tags and prints out information about
+ * facebook tags.
+ * @param {array} tags List of meta tags.
+ * @param {object} logger Logger to use to output information about the tags.
+ */
+function processFacebookTags(tags, logger) {
+    processTags(tags.filter(isFacebookTag), logger, 'facebook meta tags', facebookMediaTags);
+}
+
+/**
+ * Processes the given list of meta tags and prints out information about
+ * twitter tags.
+ * @param {array} tags List of meta tags.
+ * @param {object} logger Logger to use to output information about the tags.
+ */
+function processTwitterTags(tags, logger) {
+    processTags(tags.filter(isTwitterTag), logger, 'twitter meta tags', twitterMediaTags);
+}
+
+/**
+ * HtmlMetaAnalyserPlugin checks existing and recommended meta tags for the
+ * given html page. Outputs general information via the logger.
+ */
+export default {
+    /**
+     * Processes a single html page and outputs information about meta tags.
+     * @param {object} data jQuery object containing the html source.
+     * @param {object} logger Target to output information.
+     */
+    process: (data, logger) => {
+        const metaTags = getExistingTags(data.data);
+        processExistingTags(metaTags, logger);
+        processFacebookTags(metaTags, logger);
+        processTwitterTags(metaTags, logger);
     }
 };
