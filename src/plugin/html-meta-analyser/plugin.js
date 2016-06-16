@@ -66,18 +66,18 @@ function processExistingTags(tags, logger) {
     const tagCount = tags.length;
 
     if (tagCount === 0) {
-        logger.log('No meta tags found!');
+        logger.error('No meta tags found!');
         return;
     }
 
-    logger.log(`Found ${tagCount} meta tags`);
-    logger.log('---------------------------');
+    logger.info(`Found ${tagCount} meta tags`);
+    logger.verbose('---------------------------');
 
     tags.forEach((tag) => {
-        logger.log(` - [${tag.getName()}]: "${tag.getValue()}"`);
+        logger.verbose(` - [${tag.getName()}]: "${tag.getValue()}"`);
     });
 
-    logger.log('---------------------------');
+    logger.verbose('---------------------------');
 }
 
 /**
@@ -90,29 +90,29 @@ function processExistingTags(tags, logger) {
 function processTags(tags, logger, tagName, recommendedTagNames) {
     // Existing tags
     if (tags.length === 0) {
-        logger.log(`No ${tagName} found!`);
-        logger.log('---------------------------');
+        logger.info(`No ${tagName} found!`);
+        logger.verbose('---------------------------');
     } else {
-        logger.log(`Found ${tags.length} ${tagName}`);
-        logger.log('---------------------------');
+        logger.info(`Found ${tags.length} ${tagName}`);
+        logger.verbose('---------------------------');
         tags.forEach((tag) => {
-            logger.log(` - [${tag.getName()}]: "${tag.getValue()}"`);
+            logger.verbose(` - [${tag.getName()}]: "${tag.getValue()}"`);
         });
-        logger.log('---------------------------');
+        logger.verbose('---------------------------');
     }
 
     // Recommended tags
     const tagNames = tags.map((t) => t.getName());
     const recommendedTags = recommendedTagNames.filter((t) => tagNames.indexOf(t) === -1);
 
-    logger.log(`Recommended ${recommendedTags.length} more ${tagName}`);
-    logger.log('---------------------------');
+    logger.info(`Recommended ${recommendedTags.length} more ${tagName}`);
+    logger.verbose('---------------------------');
 
     recommendedTags.forEach((tag) => {
-        logger.log(` - [${tag}]`);
+        logger.verbose(` - [${tag}]`);
     });
 
-    logger.log('---------------------------');
+    logger.verbose('---------------------------');
 }
 
 /**
@@ -140,6 +140,13 @@ function processTwitterTags(tags, logger) {
  * given html page. Outputs general information via the logger.
  */
 export default {
+
+    /**
+     * Name of this plugin used in logger
+     * @type {string}
+     */
+    name: 'HTML Meta Analyser',
+
     /**
      * Processes a single html page and outputs information about meta tags.
      * @param {object} data jQuery object containing the html source.

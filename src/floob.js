@@ -4,5 +4,6 @@ import Option from './option/option';
 
 var options = Option.parse(process.argv);
 if (options.url) {
+    FloobApp.setup(options);
     FloobApp.process(options);
 }
