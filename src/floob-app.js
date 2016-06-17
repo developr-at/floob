@@ -30,13 +30,13 @@ var FloobApp = {
         const { url } = options;
         const self = this;
 
+        AppLogger.setLevel('info');
         AppLogger.info('FloobApp', 'Start processing with options:', options);
 
         PluginManager.setup(options, () => {
             AppLogger.info('PluginManager', 'Initialized PluginManager');
 
             const queue = PageQueue.create({ url, processResult: (data) => {
-                AppLogger.info('PageQueue', `Fetched data from url ${url}`);
                 PluginManager.process(data, self.logger);
             }});
 
