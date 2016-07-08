@@ -34,6 +34,7 @@
     "npmlog": "^3.0.0",
     "request": "2.65.0",
     "sinon": "^1.17.3",
+    "url": "^0.11.0",
     "webpack": "^1.13.0"
   },
   "dependencies": {}

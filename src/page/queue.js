@@ -1,7 +1,8 @@
+import UrlHelper from 'url';
 import PageFetcher from './fetcher';
 import PageLinkExtractor from './link-extractor';
 import AppLogger from '../logger/app-logger';
-import { extractDomain, haveSameDomain, isAbsoluteUrl } from '../util/url-helper';
+import { isAbsoluteUrl } from '../util/url-helper';
 
 /**
  * PageQueue is responsible for processing a list of pages.
@@ -19,8 +20,8 @@ const PageQueue = {
         const processedUrls = [];
         // Callback to externally process page result
         let processResultFn;
-        // Domain from which we want to process the URLs
-        let domainToProcess;
+        // Base URL to process.
+        let baseUrl;
 
         const queue = {
             /**
@@ -45,13 +46,11 @@ const PageQueue = {
              * @return Absolute URL.
              */
             convertRelativeToAbsoluteUrl: (relativeUrl) => {
-                if (!domainToProcess) {
+                if (!baseUrl) {
                     return relativeUrl;
                 }
 
-                // TODO: Fix hardcoded http://
-                // TODO: Use https://www.npmjs.com/package/url
-                return `http://${domainToProcess}${relativeUrl}`;
+                return UrlHelper.format(UrlHelper.resolve(baseUrl, relativeUrl));
             },
 
             /**
@@ -66,27 +65,28 @@ const PageQueue = {
                     return false;
                 }
 
-                const absoluteUrl = isAbsoluteUrl(url) ? url : queue.convertRelativeToAbsoluteUrl(url);
+                const absoluteRawUrl = isAbsoluteUrl(url) ? url : queue.convertRelativeToAbsoluteUrl(url);
+                const absoluteUrl = UrlHelper.parse(absoluteRawUrl);
 
-                if (!haveSameDomain(domainToProcess, absoluteUrl)) {
+                if (baseUrl.hostname !== absoluteUrl.hostname) {
                     AppLogger.verbose('PageQueue', `Ignore url from different domain: ${url}`);
                     return false;
                 }
 
                 // Check already processed
-                if (!!processedUrls && processedUrls.indexOf(absoluteUrl) !== -1) {
+                if (!!processedUrls && processedUrls.indexOf(absoluteRawUrl) !== -1) {
                     AppLogger.verbose('PageQueue', `Ignore already processed url: ${url}`);
                     return false;
                 }
 
                 // Check already in queue
-                if (!!urlsToProcess && urlsToProcess.indexOf(absoluteUrl) !== -1) {
+                if (!!urlsToProcess && urlsToProcess.indexOf(absoluteRawUrl) !== -1) {
                     AppLogger.verbose('PageQueue', `Ignore already enqueued url: ${url}`);
                     return false;
                 }
 
-                AppLogger.verbose('PageQueue', `Enqueuing url ${absoluteUrl}`);
-                urlsToProcess.push(absoluteUrl);
+                AppLogger.verbose('PageQueue', `Enqueuing url ${absoluteRawUrl}`);
+                urlsToProcess.push(absoluteRawUrl);
                 return true;
             },
 
@@ -94,9 +94,9 @@ const PageQueue = {
              * Starts the processing of the enqueued urls.
              */
             start: () => {
-                if (!domainToProcess || !processResultFn) {
-                    AppLogger.error('PageQueue', 'PageQueue hasn\'t been setup correctly. Please provide "domainToProcess" and "processResultFn"');
-                    throw Error('PageQueue hasn\'t been setup correctly. Please provide "domainToProcess" and "processResultFn"');
+                if (!baseUrl || !processResultFn) {
+                    AppLogger.error('PageQueue', 'PageQueue hasn\'t been setup correctly. Please provide "url" and "processResultFn"');
+                    throw Error('PageQueue hasn\'t been setup correctly. Please provide "url" and "processResultFn"');
                 }
 
                 processNext();
@@ -119,7 +119,7 @@ const PageQueue = {
 
             const { url, processResult } = setupOptions;
 
-            domainToProcess = extractDomain(url);
+            baseUrl = UrlHelper.parse(url);
             processResultFn = processResult;
 
             queue.enqueue(url);
