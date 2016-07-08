@@ -1,6 +1,5 @@
 import npmlog from 'npmlog';
 import fs from 'fs';
-import StringExtensions from '../util/string-extensions';
 
 // Open stream to log file.
 const logStream = fs.createWriteStream('floob.log');
@@ -52,7 +51,7 @@ const AppLogger = {
  */
 npmlog.on('log', (blob) => {
     const { level, prefix, message } = blob;
-    const logEntry = "[{0}] {1} - {2}\n\r".format(level.toUpperCase(), prefix, message);
+    const logEntry = `[${level.toUpperCase()}] ${prefix} - ${message}\n\r`;
 
     logStream.write(logEntry);
 });
