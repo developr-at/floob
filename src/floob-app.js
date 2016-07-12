@@ -17,6 +17,9 @@ var FloobApp = {
      * @param {object} options App options
      */
     setup: function(options) {
+        // const configPath = process.cwd() + '/floob.config.js';
+        // const config = require(configPath);
+
         PluginManager.registerPlugin(metaAnalyserPlugin);
         PluginManager.registerPlugin(statisticsPlugin);
     },
