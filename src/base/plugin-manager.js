@@ -6,13 +6,6 @@ import AppLogger from '../logger/app-logger';
  * @type {object}
  */
 var PluginManager = {
-
-    /**
-     * Directory containing plugins
-     * @type {string}
-     */
-    pluginDirectory: './src/plugin',
-
     /**
      * List of registered plugins
      * @type {array}
@@ -20,22 +13,13 @@ var PluginManager = {
     plugins: [],
 
     /**
-     * Loads every plugin from plugin directory and registers it.
-     * (TODO)
-     * @param {object} options App options
-     * @param {function} done Done callback
-     */
-    setup: function(options, done)  {
-        // TODO: Dynmaic loading of plugins (not possible at the moment)
-        done();
-    },
-
-    /**
      * Registers a new plugin that should be invoked for every handled page.
      * @param {object} plugin Plugin object
      */
     registerPlugin: function(plugin) {
-        this.plugins.push(plugin);
+        if (plugin) {
+            this.plugins.push(plugin);
+        }
     },
 
     /**

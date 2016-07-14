@@ -6,6 +6,7 @@ import Getopt from 'node-getopt';
  */
 function createOptionSchema() {
     return new Getopt([
+        ['c', 'config=ARG', 'Absolute path to config file'],
         ['h', 'help', 'Output usage information'],
         ['u', 'url=ARG', 'URL to scan']
     ]);

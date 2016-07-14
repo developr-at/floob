@@ -1,9 +1,8 @@
+import fs from 'fs';
 import PageQueue from './page/queue';
 import PluginManager from './base/plugin-manager';
 import ConsoleLogger from './logger/console-logger';
 import AppLogger from './logger/app-logger';
-import metaAnalyserPlugin from './plugin/html-meta-analyser/plugin';
-import statisticsPlugin from './plugin/html-statistics/plugin';
 
 /**
  * Floob Application contains the base functionality of the app.
@@ -17,11 +16,24 @@ var FloobApp = {
      * @param {object} options App options
      */
     setup: function(options) {
-        // const configPath = process.cwd() + '/floob.config.js';
-        // const config = require(configPath);
+        let configPath = process.cwd() + '/floob.config.js';
+        if (options.config) {
+            configPath = options.config;
+        }
 
-        PluginManager.registerPlugin(metaAnalyserPlugin);
-        PluginManager.registerPlugin(statisticsPlugin);
+        let config;
+        try {
+            config = require(configPath);
+        } catch (e) {
+            // TODO...
+            throw new Error(`Failed to load config file "${configPath}"`);
+        }
+
+        if (!config.plugins || config.plugins.length === 0) {
+            throw new Error(`No plugins found in "${configPath}". Please specify plugins to execute.`);
+        }
+
+        config.plugins.forEach(f => PluginManager.registerPlugin(f.plugin));
     },
 
     /**
@@ -36,15 +48,11 @@ var FloobApp = {
         AppLogger.setLevel('info');
         AppLogger.info('FloobApp', 'Start processing with options:', options);
 
-        PluginManager.setup(options, () => {
-            AppLogger.info('PluginManager', 'Initialized PluginManager');
+        const queue = PageQueue.create({ url, processResult: (data) => {
+            PluginManager.process(data, self.logger);
+        }});
 
-            const queue = PageQueue.create({ url, processResult: (data) => {
-                PluginManager.process(data, self.logger);
-            }});
-
-            queue.start();
-        });
+        queue.start();
     }
 };
 
