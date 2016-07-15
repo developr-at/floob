@@ -1,7 +1,7 @@
 {
   "name": "floob",
   "version": "1.0.0",
-  "description": "-",
+  "description": "Floob is a simple web crawler which can run several plugins to analyze each page.",
   "main": "./dist/floob.js",
   "directories": {
     "test": "test"
@@ -20,6 +20,10 @@
   "bugs": {
     "url": "https://github.com/developr-at/floob/issues"
   },
+  "bin": "./dist/floob.js",
+  "keywords": [
+    "crawler"
+  ],
   "homepage": "https://github.com/developr-at/floob#readme",
   "devDependencies": {
     "async": "^2.0.0-rc.5",
@@ -34,6 +38,5 @@
     "request": "2.65.0",
     "sinon": "^1.17.3",
     "url": "^0.11.0"
-  },
-  "dependencies": {}
+  }
 }
