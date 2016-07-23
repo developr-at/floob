@@ -2,12 +2,12 @@
   "name": "floob",
   "version": "0.0.2",
   "description": "Floob is a simple web crawler which can run several plugins to analyze each page.",
-  "main": "./dist/floob.js",
+  "main": "bin/floob",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "build": "babel src -d dist",
+    "build": "babel src -d lib",
     "test": "mocha --compilers js:babel-core/register --recursive",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha -- --compilers js:babel-core/register --recursive"
   },
@@ -20,23 +20,25 @@
   "bugs": {
     "url": "https://github.com/developr-at/floob/issues"
   },
-  "bin": "./dist/floob.js",
+  "bin": "bin/floob",
   "keywords": [
     "crawler"
   ],
   "homepage": "https://github.com/developr-at/floob#readme",
   "devDependencies": {
-    "async": "^2.0.0-rc.5",
     "babel-cli": "^6.10.1",
     "babel-preset-es2015": "^6.9.0",
     "chai": "^3.5.0",
-    "cheerio": "^0.20.0",
     "istanbul": "^1.0.0-alpha",
     "mocha": "^2.4.5",
-    "node-getopt": "^0.2.3",
     "npmlog": "^3.0.0",
+    "sinon": "^1.17.3"
+  },
+  "dependencies": {
+    "async": "^2.0.0-rc.5",
+    "cheerio": "^0.20.0",
+    "node-getopt": "^0.2.3",
     "request": "2.65.0",
-    "sinon": "^1.17.3",
     "url": "^0.11.0"
   }
 }
