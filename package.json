@@ -31,13 +31,13 @@
     "chai": "^3.5.0",
     "istanbul": "^1.0.0-alpha",
     "mocha": "^2.4.5",
-    "npmlog": "^3.0.0",
     "sinon": "^1.17.3"
   },
   "dependencies": {
     "async": "^2.0.0-rc.5",
     "cheerio": "^0.20.0",
     "node-getopt": "^0.2.3",
+    "npmlog": "^3.0.0",
     "request": "2.65.0",
     "url": "^0.11.0"
   }
