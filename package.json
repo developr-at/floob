@@ -1,6 +1,6 @@
 {
   "name": "floob",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Floob is a simple web crawler which can run several plugins to analyze each page.",
   "main": "./dist/floob.js",
   "directories": {
