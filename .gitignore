@@ -35,6 +35,3 @@ node_modules
 # Intellij stuff
 .idea
 floob.iml
-
-# Generated files
-dist/
