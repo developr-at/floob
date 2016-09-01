@@ -33,7 +33,7 @@ var FloobApp = {
             throw new Error(`No plugins found in "${configPath}". Please specify plugins to execute.`);
         }
 
-        config.plugins.forEach(f => PluginManager.registerPlugin(f.plugin));
+        config.plugins.forEach(f => PluginManager.registerPlugin(f.plugin, f.options || {}));
     },
 
     /**

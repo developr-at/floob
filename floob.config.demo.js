@@ -3,7 +3,12 @@ var StatisticsPlugin = require('./lib/plugin/html-statistics/plugin').default;
 
 module.exports = {
     plugins: [
-        { plugin: MetaAnalyserPlugin },
+        { 
+            plugin: MetaAnalyserPlugin,
+            options: {
+                dummy: 'dummy'
+            }
+        },
         { plugin: StatisticsPlugin },
     ]
 };

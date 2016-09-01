@@ -15,10 +15,16 @@ var PluginManager = {
     /**
      * Registers a new plugin that should be invoked for every handled page.
      * @param {object} plugin Plugin object
+     * @param {object} pluginConfig Configuration for the specific plugin
      */
-    registerPlugin: function(plugin) {
+    registerPlugin: function(plugin, pluginConfig = {}) {
         if (plugin) {
             this.plugins.push(plugin);
+
+            if (plugin.configure) {
+                // For now pass {} for globalConfig
+                plugin.configure(pluginConfig, {});
+            }
         }
     },
 
