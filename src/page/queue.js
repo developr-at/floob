@@ -1,4 +1,5 @@
 import UrlHelper from 'url';
+import FloobApp from '../floob-app';
 import PageFetcher from './fetcher';
 import PageLinkExtractor from './link-extractor';
 import AppLogger from '../logger/app-logger';
@@ -31,6 +32,30 @@ const PageQueue = {
              */
             get urlsToProcess () {
                 return urlsToProcess.slice();
+            },
+
+            /**
+             * Returns the number of urls which need to be processed.
+             * @return Number of URLs to process.
+             */
+            get urlsToProcessCount () {
+                return urlsToProcess.length;
+            },
+
+            /**
+             * Returns the number of urls which were already processed.
+             * @return Number of processed URLs.
+             */
+            get processedUrlsCount () {
+                return processedUrls.length;
+            },
+
+            /**
+             * Returns the combined number of processed and still outstanding URLs.
+             * @return Total number of URLs.
+             */
+            get urlsTotalCount () {
+                return urlsToProcess.length + processedUrls.length;
             },
 
             /**
@@ -131,6 +156,7 @@ const PageQueue = {
         function processNext() {
             const url = urlsToProcess.shift();
 
+            FloobApp.updateProgressLog(url, 'Fetching page');
             PageFetcher.fetch(url, (pageResult) => {
                 processResultFn(pageResult);
 
@@ -139,6 +165,7 @@ const PageQueue = {
                 processedUrls.push(url);
 
                 if (status != -1) {
+                    FloobApp.updateProgressLog(url, 'Extracting links');
                     const links = PageLinkExtractor.extractLinks(raw)
                         .map((s) => s.trim());
 

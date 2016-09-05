@@ -1,4 +1,3 @@
-
 const PluginLogger = {
 
     logger: null,

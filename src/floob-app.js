@@ -1,7 +1,7 @@
 import fs from 'fs';
+import readline from 'readline';
 import PageQueue from './page/queue';
 import PluginManager from './base/plugin-manager';
-import ConsoleLogger from './logger/console-logger';
 import AppLogger from './logger/app-logger';
 
 /**
@@ -10,6 +10,9 @@ import AppLogger from './logger/app-logger';
 var FloobApp = {
     // Logger, used to forward output from plugins.
     logger: AppLogger,
+
+    // Current page queue.
+    queue: {},
 
     /**
      * Registers plugins
@@ -21,6 +24,7 @@ var FloobApp = {
             configPath = options.config;
         }
 
+        // Try to load configuration
         let config;
         try {
             config = require(configPath);
@@ -33,7 +37,19 @@ var FloobApp = {
             throw new Error(`No plugins found in "${configPath}". Please specify plugins to execute.`);
         }
 
+        // Attach plugins
         config.plugins.forEach(f => PluginManager.registerPlugin(f.plugin, f.options || {}));
+    },
+
+    /**
+     * Outputs the updated progress log message.
+     * @param {string} url The url which is currently processed.
+     * @param {string} currenctAction Message for the current action.
+     */
+    updateProgressLog: function (url, currentAction) {
+        readline.clearLine(process.stdout, 0);
+        readline.cursorTo(process.stdout, 0)
+        process.stdout.write(`Processing ${url} [${this.queue.processedUrlsCount}/${this.queue.urlsTotalCount}]: ${currentAction}`);
     },
 
     /**
@@ -45,14 +61,15 @@ var FloobApp = {
         const { url } = options;
         const self = this;
 
-        AppLogger.setLevel('info');
+        AppLogger.setLevel('silent');
         AppLogger.info('FloobApp', 'Start processing with options:', options);
 
-        const queue = PageQueue.create({ url, processResult: (data) => {
+        // Create queue and start processing
+        this.queue = PageQueue.create({ url, processResult: (data) => {
             PluginManager.process(data, self.logger);
         }});
 
-        queue.start();
+        this.queue.start();
     }
 };
 

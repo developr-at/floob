@@ -1,5 +1,6 @@
 import PluginLogger from '../logger/plugin-logger';
 import AppLogger from '../logger/app-logger';
+import FloobApp from '../floob-app';
 
 /**
  * Allows registration of plugins and passes all needed data to every registered plugin.
@@ -35,6 +36,7 @@ var PluginManager = {
      */
     process: function(data, logger) {
         PluginLogger.logger = logger;
+        FloobApp.updateProgressLog(data.url, 'Processing plugins');
         this.plugins.forEach((plugin) => {
             AppLogger.info('PluginManager', `Handling plugin ${plugin.name}`);
             PluginLogger.pluginName = plugin.name;
