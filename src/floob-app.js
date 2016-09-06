@@ -4,6 +4,8 @@ import PageQueue from './page/queue';
 import PluginManager from './base/plugin-manager';
 import AppLogger from './logger/app-logger';
 
+let appConfig;
+
 /**
  * Floob Application contains the base functionality of the app.
  */
@@ -37,8 +39,10 @@ var FloobApp = {
             throw new Error(`No plugins found in "${configPath}". Please specify plugins to execute.`);
         }
 
+        appConfig = config.options || {};
+
         // Attach plugins
-        config.plugins.forEach(f => PluginManager.registerPlugin(f.plugin, f.options || {}));
+        config.plugins.forEach(f => PluginManager.registerPlugin(f.plugin, f.options || {}, appConfig));
     },
 
     /**
@@ -65,7 +69,7 @@ var FloobApp = {
         AppLogger.info('FloobApp', 'Start processing with options:', options);
 
         // Create queue and start processing
-        this.queue = PageQueue.create({ url, processResult: (data) => {
+        this.queue = PageQueue.create({ url, appConfig, processResult: (data) => {
             PluginManager.process(data, self.logger);
         }});
 

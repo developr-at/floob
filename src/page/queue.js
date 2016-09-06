@@ -19,6 +19,8 @@ const PageQueue = {
         const urlsToProcess = [];
         // List of URLs we have already processed
         const processedUrls = [];
+        // Application configuration
+        let config = {};
         // Callback to externally process page result
         let processResultFn;
         // Base URL to process.
@@ -79,11 +81,36 @@ const PageQueue = {
             },
 
             /**
+             * Determines if an URL should be excluded from the queue.
+             * @param {string} url URL to check.
+             * @return True if the url should be excluded; False otherwise.
+             */
+            isExcluded: (url) => {
+                // Check if exclude patterns are configured
+                if (!config.exclude) {
+                    return false;
+                }
+
+                // TODO: Make it useable for simple strings and functions as well,
+                // but for now expect config.exclude to be an array
+                return config.exclude.filter(filterExcluded).length > 0;
+
+                function filterExcluded(pattern) {
+                    return url.includes(pattern);
+                }
+            },
+
+            /**
              * Enqueues the given url if it satisfies various conditions.
              * @param {string} url URL to add.
              * @return True if the url could be added; False otherwise.
              */
             enqueue: (url) => {
+                if (queue.isExcluded(url)) {
+                    AppLogger.verbose('PageQueue', `Ignore excluded url: ${url}`);
+                    return false;
+                }
+
                 // Ignore javascript links
                 if (url.startsWith('javascript:')) {
                     AppLogger.verbose('PageQueue', `Ignore javascript url: ${url}`);
@@ -142,8 +169,9 @@ const PageQueue = {
                 throw Error(`Please provide at least 'url' and 'processResult' as options.`);
             }
 
-            const { url, processResult } = setupOptions;
+            const { url, appConfig, processResult } = setupOptions;
 
+            config = appConfig;
             baseUrl = UrlHelper.parse(url);
             processResultFn = processResult;
 

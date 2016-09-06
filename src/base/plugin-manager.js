@@ -17,8 +17,9 @@ var PluginManager = {
      * Registers a new plugin that should be invoked for every handled page.
      * @param {object} plugin Plugin object
      * @param {object} pluginConfig Configuration for the specific plugin
+     * @param {object} globalConfig Configuration for the application
      */
-    registerPlugin: function(plugin, pluginConfig = {}) {
+    registerPlugin: function(plugin, pluginConfig = {}, globalConfig = {}) {
         if (plugin) {
             this.plugins.push(plugin);
 

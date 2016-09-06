@@ -10,5 +10,8 @@ module.exports = {
             }
         },
         { plugin: StatisticsPlugin },
-    ]
+    ],
+    options: {
+        exclude: [ '/private' ]
+    }
 };
