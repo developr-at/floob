@@ -16,6 +16,15 @@ const htmlStatistics = {
     },
 
     /**
+     *
+     * @param {object} queue PageQueue
+     * @param {object} logger Logger
+     */
+    start: function(queue, logger) {
+        logger.info('start');
+    },
+
+    /**
      * Processes a single html page and outputs statistic information.
      * @param {object} data
      * @param {object} logger
@@ -25,6 +34,14 @@ const htmlStatistics = {
         logger.info(`-- Size of page: ${this.stringSize(data.raw / 1000)}kb`);
         logger.info(`-- Characters in page: ${data.raw.length}`);
         logger.info(`-- Number of links in page: ${data.data('a').length}`);
+    },
+
+    /**
+     *
+     * @param {object} logger Logger
+     */
+    finish: function(logger) {
+        logger.info('finish');
     }
 };
 

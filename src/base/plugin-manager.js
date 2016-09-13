@@ -31,6 +31,25 @@ var PluginManager = {
     },
 
     /**
+     * Invokes the start callback of every plugin.
+     * @param {object} queue PageQueue
+     * @param {object} logger Logger used by plugins to provide feedback
+     */
+    start: function(queue, logger) {
+        PluginLogger.logger = logger;
+        AppLogger.info('Starting plugins');
+        this.plugins.forEach((plugin) => {
+            if (typeof plugin.start !== 'function') {
+                return;
+            }
+
+            AppLogger.info('PluginManager', `Starting plugin ${plugin.name}`);
+            PluginLogger.pluginName = plugin.name;
+            plugin.start(queue, PluginLogger);
+        });
+    },
+
+    /**
      * Passes the given data to every registered plugin.
      * @param {object} data
      * @param {object} logger Logger used by plugins to provide feedback

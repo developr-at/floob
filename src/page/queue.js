@@ -25,6 +25,8 @@ const PageQueue = {
         let processResultFn;
         // Callback invoked when the queue is finished
         let finishedFn;
+        // Callback invoked when the queue starts
+        let startFn;
         // Base URL to process.
         let baseUrl;
 
@@ -159,12 +161,13 @@ const PageQueue = {
             /**
              * Starts the processing of the enqueued urls.
              */
-            start: () => {
+            start: function() {
                 if (!baseUrl || !processResultFn) {
                     AppLogger.error('PageQueue', 'PageQueue hasn\'t been setup correctly. Please provide "url" and "processResultFn"');
                     throw Error('PageQueue hasn\'t been setup correctly. Please provide "url" and "processResultFn"');
                 }
 
+                startFn(this);
                 processNext();
             }
         };
@@ -193,6 +196,12 @@ const PageQueue = {
                 finishedFn = setupOptions.finished;
             } else {
                 finishedFn = function() {};
+            }
+
+            if (typeof setupOptions.start === 'function') {
+                startFn = setupOptions.start;
+            } else {
+                startFn = function(queue) {};
             }
 
             if (typeof config.exclude === 'undefined') {

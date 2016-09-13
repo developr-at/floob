@@ -69,9 +69,11 @@ var FloobApp = {
         AppLogger.info('FloobApp', 'Start processing with options:', options);
 
         // Create queue and start processing
-        this.queue = PageQueue.create({ url, appConfig, processResult: (data) => {
+        this.queue = PageQueue.create({ url, appConfig, start: (queue) => {
+            PluginManager.start(queue, self.logger);
+        }, processResult: (data) => {
             PluginManager.process(data, self.logger);
-        }, finished: function() {
+        }, finished: () => {
             PluginManager.finish(self.logger);
         }});
 
