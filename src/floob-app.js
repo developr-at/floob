@@ -53,7 +53,7 @@ var FloobApp = {
     updateProgressLog: function (url, currentAction) {
         readline.clearLine(process.stdout, 0);
         readline.cursorTo(process.stdout, 0)
-        process.stdout.write(`Processing ${url} [${this.queue.processedUrlsCount}/${this.queue.urlsTotalCount}]: ${currentAction}`);
+        process.stdout.write(`Processing ${url} [${this.queue.processedUrlsCount}/${this.queue.urlsLimit}]: ${currentAction}`);
     },
 
     /**
@@ -71,6 +71,8 @@ var FloobApp = {
         // Create queue and start processing
         this.queue = PageQueue.create({ url, appConfig, processResult: (data) => {
             PluginManager.process(data, self.logger);
+        }, finished: function() {
+            PluginManager.finish(self.logger);
         }});
 
         this.queue.start();

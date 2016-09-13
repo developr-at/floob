@@ -39,9 +39,31 @@ var PluginManager = {
         PluginLogger.logger = logger;
         FloobApp.updateProgressLog(data.url, 'Processing plugins');
         this.plugins.forEach((plugin) => {
+            if (typeof plugin.process !== 'function') {
+                return;
+            }
+
             AppLogger.info('PluginManager', `Handling plugin ${plugin.name}`);
             PluginLogger.pluginName = plugin.name;
             plugin.process(data, PluginLogger);
+        });
+    },
+
+    /**
+     * Invokes the finish callback of every plugin.
+     * @param {object} logger Logger used by plugins to provide feedback
+     */
+    finish: function(logger) {
+        PluginLogger.logger = logger;
+        AppLogger.info('Finishing plugins');
+        this.plugins.forEach((plugin) => {
+            if (typeof plugin.finish !== 'function') {
+                return;
+            }
+
+            AppLogger.info('PluginManager', `Finishing plugin ${plugin.name}`);
+            PluginLogger.pluginName = plugin.name;
+            plugin.finish(PluginLogger);
         });
     }
 };

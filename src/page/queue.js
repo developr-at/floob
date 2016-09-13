@@ -23,6 +23,8 @@ const PageQueue = {
         let config = {};
         // Callback to externally process page result
         let processResultFn;
+        // Callback invoked when the queue is finished
+        let finishedFn;
         // Base URL to process.
         let baseUrl;
 
@@ -58,6 +60,17 @@ const PageQueue = {
              */
             get urlsTotalCount () {
                 return urlsToProcess.length + processedUrls.length;
+            },
+
+            /**
+             * Returns the urls limit or the value of urlsTotalCount if there is no limit.
+             * @return Limit or urlsTotalCount if there is no limit
+             */
+            get urlsLimit() {
+                if (config.limit) {
+                    return config.limit;
+                }
+                return this.urlsTotalCount;
             },
 
             /**
@@ -106,6 +119,7 @@ const PageQueue = {
              * @return True if the url could be added; False otherwise.
              */
             enqueue: (url) => {
+
                 if (queue.isExcluded(url)) {
                     AppLogger.verbose('PageQueue', `Ignore excluded url: ${url}`);
                     return false;
@@ -171,9 +185,19 @@ const PageQueue = {
 
             const { url, appConfig, processResult } = setupOptions;
 
-            config = appConfig;
+            config = appConfig || {};
             baseUrl = UrlHelper.parse(url);
             processResultFn = processResult;
+
+            if (typeof setupOptions.finished === 'function') {
+                finishedFn = setupOptions.finished;
+            } else {
+                finishedFn = function() {};
+            }
+
+            if (typeof config.exclude === 'undefined') {
+                config.exclude = [];
+            }
 
             PageFetcher.setup(config);
 
@@ -204,10 +228,18 @@ const PageQueue = {
                     links.forEach(queue.enqueue);
                 }
 
+                // Exit 1: Reached limit
+                if (config.limit && processedUrls.length >= config.limit) {
+                    AppLogger.info('PageQueue', `Reached the page limit of ${config.limit} pages!`);
+                    return finishedFn();
+                }
+
                 if (urlsToProcess.length > 0) {
                     processNext();
                 } else {
+                    // Exit 2: Handled all urls
                     AppLogger.info('PageQueue', 'No more urls to process found!');
+                    return finishedFn();
                 }
             });
         }

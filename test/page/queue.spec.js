@@ -69,4 +69,19 @@ describe('PageQueue Component', () => {
     it('should fail if no options are provided', () => {
         expect(PageQueue.create).to.throw(Error, /Please provide at least 'url' and 'processResult' as options./);
     });
+
+    it('should respect the limit option', () => {
+        const limit = 5;
+        var counter = 0;
+        const queue = PageQueue.create({
+            url: "http://www.test1.at",
+            processResult: () => {
+                counter++; },
+            finished: () => {
+                expect(counter).to.be.below(limit + 1);
+            },
+            appConfig: { limit: limit }});
+
+        expect(queue.urlsLimit).to.equal(limit);
+    });
 });

@@ -3,5 +3,8 @@ var MetaAnalyserPlugin = require('./lib/plugin/html-meta-analyser/plugin').defau
 module.exports = {
     plugins: [
         { plugin: MetaAnalyserPlugin },
-    ]
+    ],
+    options: {
+        limit: 5
+    }
 };
