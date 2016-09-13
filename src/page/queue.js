@@ -175,6 +175,8 @@ const PageQueue = {
             baseUrl = UrlHelper.parse(url);
             processResultFn = processResult;
 
+            PageFetcher.setup(config);
+
             queue.enqueue(url);
         }
 
