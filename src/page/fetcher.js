@@ -61,8 +61,12 @@ const PageFetcher = {
              */
             fetch: (url, callback) => {
                 let headers = prepareRequestHeaders(config.cookie);
+                let requestData = {
+                    url,
+                    headers
+                };
 
-                request.get({ url, headers }, function (err, resp, body) {
+                request.get(requestData, function (err, resp, body) {
                     callback(mapFetchResult(err, resp, body, url));
                 });
             }

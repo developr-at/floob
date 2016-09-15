@@ -1,10 +1,18 @@
+import extend from 'extend';
 import fs from 'fs';
 import readline from 'readline';
 import PageQueue from './page/queue';
 import PluginManager from './base/plugin-manager';
 import AppLogger from './logger/app-logger';
 
+// Application Configuration
 let appConfig;
+
+// Default Application Configuration
+const DefaultAppConfig = {
+    ignoreSslErrors: false,
+    exclude: []
+};
 
 /**
  * Floob Application contains the base functionality of the app.
@@ -39,7 +47,7 @@ var FloobApp = {
             throw new Error(`No plugins found in "${configPath}". Please specify plugins to execute.`);
         }
 
-        appConfig = config.options || {};
+        appConfig = extend({}, DefaultAppConfig, config.options);
 
         // Attach plugins
         config.plugins.forEach(f => PluginManager.registerPlugin(f.plugin, f.options || {}, appConfig));

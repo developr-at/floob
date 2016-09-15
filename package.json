@@ -36,6 +36,7 @@
   "dependencies": {
     "async": "^2.0.0-rc.5",
     "cheerio": "^0.20.0",
+    "extend": "^3.0.0",
     "node-getopt": "^0.2.3",
     "npmlog": "^3.0.0",
     "request": "2.65.0",
