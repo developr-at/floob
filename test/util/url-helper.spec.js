@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { extractDomain, haveSameDomain, isAbsoluteUrl } from '../../src/util/url-helper';
+import { isAbsoluteUrl } from '../../src/util/url-helper';
 
 describe('URL Helper', () => {
     it('should recognize relative urls', () => {

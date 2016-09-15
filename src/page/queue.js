@@ -29,6 +29,8 @@ const PageQueue = {
         let startFn;
         // Base URL to process.
         let baseUrl;
+        // PageFetcher instance.
+        let pageFetcher;
 
         const queue = {
             /**
@@ -208,7 +210,8 @@ const PageQueue = {
                 config.exclude = [];
             }
 
-            PageFetcher.setup(config);
+            pageFetcher = PageFetcher.create();
+            pageFetcher.setup(config);
 
             queue.enqueue(url);
         }
@@ -220,7 +223,7 @@ const PageQueue = {
             const url = urlsToProcess.shift();
 
             FloobApp.updateProgressLog(url, 'Fetching page');
-            PageFetcher.fetch(url, (pageResult) => {
+            pageFetcher.fetch(url, (pageResult) => {
                 processResultFn(pageResult);
 
                 const { status, url, raw } = pageResult;

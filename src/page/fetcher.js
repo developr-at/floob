@@ -1,5 +1,6 @@
 import request from 'request';
 import cheerio from 'cheerio';
+import { getCookieString } from '../util/cookie-helper'
 
 // Global application configuration
 let config = {};
@@ -22,23 +23,6 @@ function mapFetchResult(err, resp, body, url) {
 }
 
 /**
- * Converts the given object into a cookieString.
- * @param {object} data Object to convert.
- * @return {string} Cookiestring in format: "key=value; key=value"
- */
-function getCookieString(data = {}) {
-    let cookieString = '';
-
-    for (let prop in data) {
-        if (data.hasOwnProperty(prop)) {
-            cookieString += `${prop}=${data[prop]}; `;
-        }
-    }
-
-    return cookieString;
-}
-
-/**
  * Prepares the request headers.
  * Currently only cookie value can be set.
  * @param {object} cookieData Cookie values as an object.
@@ -53,26 +37,39 @@ function prepareRequestHeaders(cookieData = {}) {
 /**
  * PageFetcher is responsible for loading pages.
  */
-export default {
+const PageFetcher = {
     /**
-     * Configures the page fetcher.
-     * @param {object} appConfig The global configuration.
+     * Creates a new PageFetcher with the given options.
+     * @param {object} options Options to initialize the queue with.
+     * @return New PageFetcher object.
      */
-    setup: (appConfig) => {
-        config = appConfig;
-    },
+    create: (options) => {
+        const fetcher = {
+            /**
+             * Configures the page fetcher.
+             * @param {object} appConfig The global configuration.
+             */
+            setup: (appConfig = {}) => {
+                config = appConfig;
+            },
 
-    /**
-     * Fetch a single page from the given url and call
-     * the given callback with the result object.
-     * @param {string} url The URL to fetch the page from.
-     * @param {Function} callback Callback to call with the result.
-     */
-    fetch: (url, callback) => {
-        let headers = prepareRequestHeaders(config.cookie);
+            /**
+             * Fetch a single page from the given url and call
+             * the given callback with the result object.
+             * @param {string} url The URL to fetch the page from.
+             * @param {Function} callback Callback to call with the result.
+             */
+            fetch: (url, callback) => {
+                let headers = prepareRequestHeaders(config.cookie);
 
-        request.get({ url, headers }, function (err, resp, body) {
-            callback(mapFetchResult(err, resp, body, url));
-        });
+                request.get({ url, headers }, function (err, resp, body) {
+                    callback(mapFetchResult(err, resp, body, url));
+                });
+            }
+        };
+
+        return fetcher;
     }
-};
+}
+
+export default PageFetcher;
