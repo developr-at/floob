@@ -21,15 +21,13 @@ describe('PageFetcher Component', () => {
         done();
     });
 
-    xit('should return a PageResult on Success.', (done) => {
+    it('should return a PageResult on Success.', (done) => {
         const url = 'http://www.success.com';
 
         request.get
-            .withArgs(url)
             .yields(null, { statusCode: 200 }, '<html><body><h1>Test</h1></body></html>');
 
         const pageFetcher = PageFetcher.create();
-
         pageFetcher.fetch(url, (pageResult) => {
             expect(request.get.calledOnce).to.be.true;
             expect(pageResult).not.to.be.null;
@@ -49,15 +47,13 @@ describe('PageFetcher Component', () => {
         });
     });
 
-    xit('should return an ErrorResult on Failure', (done) => {
+    it('should return an ErrorResult on Failure', (done) => {
         const url = 'http://www.failure.com';
 
         request.get
-            .withArgs(url)
             .yields(new Error('getaddrinfo ENOTFOUND'), undefined, undefined);
 
         const pageFetcher = PageFetcher.create();
-
         pageFetcher.fetch(url, (pageResult) => {
             expect(request.get.calledOnce).to.be.true;
             expect(pageResult).not.to.be.null;
