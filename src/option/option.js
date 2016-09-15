@@ -12,6 +12,8 @@ function createOptionSchema() {
     ]);
 }
 
+let getOpt = {};
+
 /**
  * Wrapper for Options.
  */
@@ -22,8 +24,18 @@ export default {
      * @return Object containing the extracted options.
      */
     parse: (args) => {
-        var getopt = createOptionSchema();
-        var getoptOutput = getopt.parse(args);
-        return getoptOutput.options;
+        getOpt = createOptionSchema();
+        let getOptOutput = getOpt.parse(args);
+
+        return getOptOutput.options;
+    },
+
+    /**
+     * Prints the help information for all available cli parameter
+     */
+    showHelp: () => {
+        if (getOpt.showHelp) {
+            getOpt.showHelp();
+        }
     }
 };
