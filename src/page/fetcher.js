@@ -63,7 +63,8 @@ const PageFetcher = {
                 let headers = prepareRequestHeaders(config.cookie);
                 let requestData = {
                     url,
-                    headers
+                    headers,
+                    rejectUnauthorized: !config.ignoreSslErrors
                 };
 
                 request.get(requestData, function (err, resp, body) {
